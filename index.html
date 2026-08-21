@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dragon Park 🐉</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🐉 Dragon Park 🐉</h1>
+        <p class="subtitle">Садись на меня, добрый дракон с седлом, и полетим в приключение!</p>
+        <div class="score-board">
+            <span>Звёзды: <span id="score">0</span></span>
+            <span>Время: <span id="timer">60</span>с</span>
+        </div>
+        <canvas id="gameCanvas" width="800" height="500"></canvas>
+        <div class="controls">
+            <p>Управление: ← ↑ → ↓ или WASD</p>
+            <button id="startBtn">Начать игру!</button>
+            <button id="restartBtn" style="display:none;">Играть снова</button>
+        </div>
+        <div id="message" class="message"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
