@@ -1,27 +1,34 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dragon Park 🐉</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Dragon Park</title>
+  <meta name="description" content="Садись в седло и лети по сумеречному парку — собирай звёзды, посещай аттракционы, лови комбо." />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <div class="container">
-        <h1>🐉 Dragon Park 🐉</h1>
-        <p class="subtitle">Садись на меня, добрый дракон с седлом, и полетим в приключение!</p>
-        <div class="score-board">
-            <span>Звёзды: <span id="score">0</span></span>
-            <span>Время: <span id="timer">60</span>с</span>
-        </div>
-        <canvas id="gameCanvas" width="800" height="500"></canvas>
-        <div class="controls">
-            <p>Управление: ← ↑ → ↓ или WASD</p>
-            <button id="startBtn">Начать игру!</button>
-            <button id="restartBtn" style="display:none;">Играть снова</button>
-        </div>
-        <div id="message" class="message"></div>
+  <main class="stage">
+    <canvas id="game" width="960" height="540"></canvas>
+    <header class="hud" id="hud" hidden>
+      <div class="chip"><span>Очки</span><strong id="score">0</strong></div>
+      <div class="chip"><span>Время</span><strong id="timer">1:20</strong></div>
+      <div class="chip" id="comboChip" hidden><span>Комбо</span><strong id="combo">×1</strong></div>
+      <div class="chip"><span>Рекорд</span><strong id="best">0</strong></div>
+    </header>
+    <p class="toast" id="toast"></p>
+    <section class="panel" id="panel">
+      <p class="kicker">Сумеречный круг</p>
+      <h1>Dragon Park</h1>
+      <p class="lead">Садись в седло доброго дракона и лети по парку: звёзды, сундуки, карусель, озеро и замок.</p>
+      <button type="button" id="startBtn">В седло</button>
+      <p class="hint">WASD или стрелки · пробел — рывок</p>
+    </section>
+    <div class="touch" id="touch" hidden>
+      <div class="stick" id="stick"><i id="knob"></i></div>
+      <button type="button" class="boost" id="boostBtn">Рывок</button>
     </div>
-    <script src="script.js"></script>
+  </main>
+  <script src="script.js"></script>
 </body>
 </html>
