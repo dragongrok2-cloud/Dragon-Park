@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Dragon Park</title>
-  <meta name="description" content="Садись в седло и лети по сумеречному парку — собирай звёзды, посещай аттракционы, лови комбо." />
+  <meta name="description" content="Садись в седло и лети по сумеречному парку — собирай звёзды, фонари и сундуки, посещай аттракционы." />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -12,17 +12,21 @@
     <canvas id="game" width="960" height="540"></canvas>
     <header class="hud" id="hud" hidden>
       <div class="chip"><span>Очки</span><strong id="score">0</strong></div>
-      <div class="chip"><span>Время</span><strong id="timer">1:20</strong></div>
+      <div class="chip"><span>Время</span><strong id="timer">1:30</strong></div>
       <div class="chip" id="comboChip" hidden><span>Комбо</span><strong id="combo">×1</strong></div>
       <div class="chip"><span>Рекорд</span><strong id="best">0</strong></div>
+      <div class="chip fuel">
+        <span>Рывок</span>
+        <i><b id="fuelBar"></b></i>
+      </div>
     </header>
     <p class="toast" id="toast"></p>
     <section class="panel" id="panel">
       <p class="kicker">Сумеречный круг</p>
       <h1>Dragon Park</h1>
-      <p class="lead">Садись в седло доброго дракона и лети по парку: звёзды, сундуки, карусель, озеро и замок.</p>
+      <p class="lead">Ночь фонарей. Садись в седло доброго дракона: звёзды, сундуки, колесо, озеро и замок.</p>
       <button type="button" id="startBtn">В седло</button>
-      <p class="hint">WASD или стрелки · пробел — рывок</p>
+      <p class="hint">WASD или стрелки · пробел — рывок · Escape — пауза</p>
     </section>
     <div class="touch" id="touch" hidden>
       <div class="stick" id="stick"><i id="knob"></i></div>

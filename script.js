@@ -1,50 +1,58 @@
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
-const WORLD_W = 2400, WORLD_H = 1400, ROUND = 80;
+const WORLD_W = 2800, WORLD_H = 1600, ROUND = 90;
 const keys = new Set();
 let touch = { x: 0, y: 0, on: false, boost: false };
 let mode = "title", score = 0, timeLeft = ROUND, combo = 0, comboT = 0;
-let best = 0, message = "", messageT = 0, acc = 0, last = performance.now(), time = 0;
+let best = 0, message = "", messageT = 0, acc = 0, last = performance.now(), time = 0, trauma = 0;
 try { best = JSON.parse(localStorage.getItem("dragon-park-save") || "{}").best || 0; } catch {}
 document.getElementById("best").textContent = best;
 
-const dragon = { x: 400, y: 700, vx: 40, vy: 0, wing: 0, facing: 1, fuel: 1 };
+const dragon = { x: 420, y: 720, vx: 40, vy: 0, wing: 0, facing: 1, fuel: 1 };
 const cam = { x: 0, y: 0 };
 const items = [];
 const parts = [];
 const landmarks = [
-  { id: "lake", x: 560, y: 820, r: 90, name: "Озеро", bonus: 25, cool: 0 },
-  { id: "car", x: 1100, y: 980, r: 80, name: "Карусель", bonus: 30, cool: 0 },
-  { id: "gate", x: 1600, y: 1040, r: 70, name: "Луг", bonus: 20, cool: 0 },
-  { id: "castle", x: 2100, y: 760, r: 110, name: "Замок", bonus: 40, cool: 0 },
+  { id: "observatory", x: 280, y: 420, r: 78, name: "Обсерватория", bonus: 35, cool: 0 },
+  { id: "lake", x: 620, y: 880, r: 96, name: "Озеро", bonus: 25, cool: 0 },
+  { id: "wheel", x: 980, y: 620, r: 88, name: "Колесо", bonus: 32, cool: 0 },
+  { id: "carousel", x: 1180, y: 1080, r: 80, name: "Карусель", bonus: 30, cool: 0 },
+  { id: "meadow", x: 1680, y: 1120, r: 74, name: "Луг", bonus: 20, cool: 0 },
+  { id: "market", x: 1860, y: 740, r: 86, name: "Рынок", bonus: 28, cool: 0 },
+  { id: "castle", x: 2380, y: 720, r: 118, name: "Замок", bonus: 45, cool: 0 },
 ];
-const trees = Array.from({ length: 36 }, () => ({
+const trees = Array.from({ length: 42 }, () => ({
   x: 40 + Math.random() * (WORLD_W - 80),
-  y: 720 + Math.random() * 560,
-  s: 40 + Math.random() * 70,
+  y: 760 + Math.random() * 620,
+  s: 38 + Math.random() * 72,
 }));
-const clouds = Array.from({ length: 8 }, () => ({
-  x: Math.random() * WORLD_W, y: 40 + Math.random() * 220, s: 50 + Math.random() * 60, spd: 10 + Math.random() * 14,
+const clouds = Array.from({ length: 10 }, () => ({
+  x: Math.random() * WORLD_W, y: 36 + Math.random() * 240, s: 48 + Math.random() * 70, spd: 8 + Math.random() * 16,
+}));
+const fireflies = Array.from({ length: 40 }, () => ({
+  x: Math.random() * WORLD_W, y: 200 + Math.random() * (WORLD_H - 280), phase: Math.random() * 6,
 }));
 
 function spawn(kind) {
+  const chest = kind === "chest", star = kind === "star", lantern = kind === "lantern";
   return {
-    kind, x: 80 + Math.random() * (WORLD_W - 160), y: 160 + Math.random() * (WORLD_H - 320),
-    phase: Math.random() * 6, taken: false, r: kind === "chest" ? 14 : kind === "star" ? 12 : 6,
-    value: kind === "chest" ? 40 : kind === "star" ? 10 : 5, wait: 0,
+    kind, x: 80 + Math.random() * (WORLD_W - 160), y: 140 + Math.random() * (WORLD_H - 300),
+    phase: Math.random() * 6, taken: false, r: chest ? 14 : star ? 12 : lantern ? 10 : 6,
+    value: chest ? 40 : star ? 10 : lantern ? 15 : 5, wait: 0, drift: lantern ? 12 + Math.random() * 18 : 0,
   };
 }
 function fillItems() {
   items.length = 0;
-  for (let i = 0; i < 9; i++) items.push(spawn("star"));
-  for (let i = 0; i < 12; i++) items.push(spawn("ember"));
-  for (let i = 0; i < 3; i++) items.push(spawn("chest"));
+  for (let i = 0; i < 12; i++) items.push(spawn("star"));
+  for (let i = 0; i < 14; i++) items.push(spawn("ember"));
+  for (let i = 0; i < 4; i++) items.push(spawn("chest"));
+  for (let i = 0; i < 8; i++) items.push(spawn("lantern"));
 }
 fillItems();
 
 function toast(t) { message = t; messageT = 2.2; document.getElementById("toast").textContent = t; }
 function saveBest() {
-  try { localStorage.setItem("dragon-park-save", JSON.stringify({ version: 1, best })); } catch {}
+  try { localStorage.setItem("dragon-park-save", JSON.stringify({ version: 2, best })); } catch {}
 }
 
 function resize() {
@@ -62,6 +70,15 @@ resize();
 addEventListener("keydown", (e) => {
   keys.add(e.code);
   if (["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) e.preventDefault();
+  if ((e.code === "Escape" || e.code === "KeyP") && mode === "play") {
+    mode = "pause";
+    document.getElementById("panel").hidden = false;
+    document.querySelector(".lead").textContent = "Седло ждёт. Escape — снова в воздух.";
+    document.getElementById("startBtn").textContent = "Продолжить";
+  } else if ((e.code === "Escape" || e.code === "KeyP") && mode === "pause") {
+    mode = "play";
+    document.getElementById("panel").hidden = true;
+  }
 });
 addEventListener("keyup", (e) => keys.delete(e.code));
 addEventListener("blur", () => keys.clear());
@@ -87,9 +104,14 @@ document.getElementById("boostBtn").addEventListener("pointerdown", (e) => { e.p
 document.getElementById("boostBtn").addEventListener("pointerup", () => { touch.boost = false; });
 
 function start() {
+  if (mode === "pause") {
+    mode = "play";
+    document.getElementById("panel").hidden = true;
+    return;
+  }
   mode = "play";
   score = 0; timeLeft = ROUND; combo = 0;
-  dragon.x = 400; dragon.y = 700; dragon.vx = 80; dragon.vy = 0; dragon.fuel = 1;
+  dragon.x = 420; dragon.y = 720; dragon.vx = 90; dragon.vy = 0; dragon.fuel = 1;
   fillItems();
   landmarks.forEach((l) => (l.cool = 0));
   document.getElementById("panel").hidden = true;
@@ -105,10 +127,10 @@ function ellipse(x, y, rx, ry, fill) {
 
 function drawSky(w, h) {
   const g = ctx.createLinearGradient(0, 0, 0, h);
-  g.addColorStop(0, "#1a2438"); g.addColorStop(0.45, "#3d3a58");
-  g.addColorStop(0.72, "#c45c3e"); g.addColorStop(1, "#e8a05a");
+  g.addColorStop(0, "#12182a"); g.addColorStop(0.38, "#2c314c");
+  g.addColorStop(0.68, "#8a4a3a"); g.addColorStop(1, "#d4894a");
   ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
-  ellipse(w * 0.78, h * 0.62, 36, 36, "#f4d7a8");
+  ellipse(w * 0.78, h * 0.58, 42, 42, "#f4d7a8");
 }
 
 function drawDragon() {
@@ -148,49 +170,81 @@ function drawDragon() {
 
 function drawWorld(vw, vh) {
   ctx.save(); ctx.translate(-cam.x, -cam.y);
-  ctx.fillStyle = "#2c3d38";
-  ctx.fillRect(-40, 680, WORLD_W + 80, WORLD_H);
   ctx.fillStyle = "#24352c";
-  ctx.fillRect(-40, 860, WORLD_W + 80, WORLD_H);
-  ellipse(560, 860, 200, 64, "#2f5a66");
-  ellipse(560, 854, 150, 40, "#3d7380");
+  ctx.fillRect(-40, 700, WORLD_W + 80, WORLD_H);
+  ctx.fillStyle = "#1d2c24";
+  ctx.fillRect(-40, 900, WORLD_W + 80, WORLD_H);
+  ellipse(620, 910, 220, 70, "#2f5a66");
+  ellipse(620, 900, 168, 44, "#3d7380");
   ctx.strokeStyle = "#c4a882"; ctx.lineWidth = 22; ctx.lineCap = "round";
-  ctx.beginPath(); ctx.moveTo(40, 1040); ctx.lineTo(700, 980); ctx.lineTo(1200, 1080); ctx.lineTo(1800, 1020); ctx.lineTo(2360, 900); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(40, 1080); ctx.lineTo(640, 1000); ctx.lineTo(1180, 1140); ctx.lineTo(1760, 1060); ctx.lineTo(2360, 920); ctx.stroke();
   for (const t of trees) {
     if (t.x < cam.x - 60 || t.x > cam.x + vw + 60) continue;
     ctx.fillStyle = "#4a3424"; ctx.fillRect(t.x - 6, t.y, 12, t.s * 0.45);
     ellipse(t.x, t.y - t.s * 0.2, t.s * 0.38, t.s * 0.32, "#2f6a4c");
   }
-  ctx.fillStyle = "#4a4558";
-  ctx.fillRect(2020, 700, 160, 100);
-  ctx.fillRect(1990, 660, 40, 140);
-  ctx.fillRect(2170, 660, 40, 140);
+  ctx.fillStyle = "#3a3d4e";
+  ctx.fillRect(2290, 700, 180, 118);
+  ctx.fillRect(2262, 662, 44, 156);
+  ctx.fillRect(2454, 662, 44, 156);
+  ctx.fillStyle = "rgba(240,210,122,0.55)";
+  ctx.fillRect(2320, 730, 10, 14); ctx.fillRect(2380, 730, 10, 14); ctx.fillRect(2440, 730, 10, 14);
+  ctx.fillStyle = "#3d4254"; ctx.fillRect(244, 420, 72, 54);
+  ellipse(280, 420, 48, 28, "#4a5064");
+  ctx.strokeStyle = "#c4a882"; ctx.lineWidth = 5;
+  ctx.beginPath(); ctx.arc(980, 620, 70, 0, Math.PI * 2); ctx.stroke();
+  for (let i = 0; i < 8; i++) {
+    const a = time * 0.35 + (i * Math.PI) / 4;
+    ctx.fillStyle = i % 2 ? "#e25a3c" : "#f0d27a";
+    ctx.fillRect(980 + Math.cos(a) * 70 - 6, 620 + Math.sin(a) * 70 - 4, 12, 10);
+  }
   ctx.fillStyle = "#e25a3c";
-  ctx.beginPath(); ctx.moveTo(1048, 930); ctx.lineTo(1100, 900); ctx.lineTo(1152, 930); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(1126, 1040); ctx.lineTo(1180, 1000); ctx.lineTo(1234, 1040); ctx.fill();
   ctx.strokeStyle = "#c45c3e"; ctx.lineWidth = 4;
-  ctx.beginPath(); ctx.arc(1100, 970, 44, Math.PI, 0); ctx.stroke();
+  ctx.beginPath(); ctx.arc(1180, 1080, 46, Math.PI, 0); ctx.stroke();
+  ctx.fillStyle = "#5c3a24";
+  ctx.fillRect(1838, 760, 44, 28); ctx.fillRect(1906, 754, 44, 28);
+  ctx.fillStyle = "#e25a3c";
+  ctx.beginPath(); ctx.moveTo(1832, 764); ctx.lineTo(1860, 738); ctx.lineTo(1888, 764); ctx.fill();
   ctx.font = "600 13px Segoe UI, sans-serif"; ctx.textAlign = "center"; ctx.fillStyle = "rgba(243,235,224,0.8)";
-  for (const l of landmarks) ctx.fillText(l.name, l.x, l.y - 86);
+  for (const l of landmarks) ctx.fillText(l.name, l.x, l.y - 92);
   for (const it of items) {
     if (it.taken) continue;
     const p = Math.sin(it.phase) * 2;
-    ctx.save(); ctx.translate(it.x, it.y);
+    ctx.save(); ctx.translate(it.x, it.y + p);
     if (it.kind === "star") {
       ctx.rotate(it.phase * 0.3); ctx.fillStyle = "#f0d27a"; ctx.beginPath();
       for (let i = 0; i < 5; i++) {
         const a = (i * 2 * Math.PI) / 5 - Math.PI / 2;
-        ctx.lineTo(Math.cos(a) * (12 + p), Math.sin(a) * (12 + p));
+        ctx.lineTo(Math.cos(a) * 12, Math.sin(a) * 12);
         ctx.lineTo(Math.cos(a + Math.PI / 5) * 5, Math.sin(a + Math.PI / 5) * 5);
       }
       ctx.closePath(); ctx.fill();
     } else if (it.kind === "ember") ellipse(0, 0, 5, 5, "#e25a3c");
+    else if (it.kind === "lantern") { ellipse(0, 0, 8, 10, "#e25a3c"); ellipse(0, 1, 4, 5, "#f0d27a"); }
     else { ctx.fillStyle = "#5c3a24"; ctx.fillRect(-11, -7, 22, 16); ctx.fillStyle = "#c4a15a"; ctx.fillRect(-11, -1, 22, 4); }
     ctx.restore();
   }
   drawDragon();
   for (const p of parts) { ctx.globalAlpha = p.life / p.max; ellipse(p.x, p.y, p.s, p.s, p.c); }
   ctx.globalAlpha = 1;
+  for (const f of fireflies) {
+    ctx.globalAlpha = 0.25 + Math.sin(time * 3 + f.phase) * 0.25;
+    ellipse(f.x, f.y, 2, 2, "#f0d27a");
+  }
+  ctx.globalAlpha = 1;
   ctx.restore();
+}
+
+function drawMinimap(vw) {
+  const mw = 168, mh = 96, x = vw - mw - 16, y = 72;
+  ctx.fillStyle = "rgba(18,21,28,0.72)";
+  ctx.fillRect(x, y, mw, mh);
+  const sx = mw / WORLD_W, sy = mh / WORLD_H;
+  ctx.fillStyle = "rgba(243,235,224,0.35)";
+  for (const l of landmarks) { ctx.beginPath(); ctx.arc(x + l.x * sx, y + l.y * sy, 2.2, 0, Math.PI * 2); ctx.fill(); }
+  ctx.fillStyle = "#e25a3c";
+  ctx.beginPath(); ctx.arc(x + dragon.x * sx, y + dragon.y * sy, 3.2, 0, Math.PI * 2); ctx.fill();
 }
 
 function burst(x, y, c) {
@@ -201,16 +255,18 @@ function burst(x, y, c) {
 }
 
 function collect(it) {
-  it.taken = true; it.wait = it.kind === "chest" ? 8 : 1;
+  it.taken = true; it.wait = it.kind === "chest" ? 8 : it.kind === "lantern" ? 2.4 : 1;
   combo += 1; comboT = 2;
   const gain = Math.round(it.value * (1 + Math.min(combo - 1, 8) * 0.15));
   score += gain;
   burst(it.x, it.y, it.kind === "ember" ? "#e25a3c" : "#f0d27a");
-  toast(combo > 4 ? "Держи комбо — парк любит скорость." : "Звезда в седле звенит громче.");
+  if (it.kind === "chest") trauma = Math.min(1, trauma + 0.35);
+  toast(combo > 4 ? "Держи комбо — парк любит скорость." : "Свет в седле звенит громче.");
 }
 
 function step(dt) {
   time += dt;
+  if (mode === "pause") return;
   let ax = 0, ay = 0;
   if (keys.has("KeyA") || keys.has("ArrowLeft")) ax -= 1;
   if (keys.has("KeyD") || keys.has("ArrowRight")) ax += 1;
@@ -223,7 +279,7 @@ function step(dt) {
   const boosting = mode === "play" && (keys.has("Space") || touch.boost) && dragon.fuel > 0.05;
   if (boosting) dragon.fuel = Math.max(0, dragon.fuel - dt * 0.55);
   else dragon.fuel = Math.min(1, dragon.fuel + dt * 0.22);
-  const max = boosting ? 500 : 300;
+  const max = boosting ? 520 : 310;
   dragon.vx += ax * 980 * dt; dragon.vy += ay * 980 * dt;
   dragon.vx -= dragon.vx * 2.6 * dt; dragon.vy -= dragon.vy * 2.6 * dt;
   const spd = Math.hypot(dragon.vx, dragon.vy);
@@ -235,11 +291,12 @@ function step(dt) {
   const vw = innerWidth, vh = innerHeight;
   let tx = dragon.x - vw / 2 + dragon.vx * 0.2;
   let ty = dragon.y - vh / 2 + dragon.vy * 0.14;
-  tx = Math.max(0, Math.min(WORLD_W - vw, tx));
-  ty = Math.max(0, Math.min(WORLD_H - vh, ty));
+  tx = Math.max(0, Math.min(Math.max(0, WORLD_W - vw), tx));
+  ty = Math.max(0, Math.min(Math.max(0, WORLD_H - vh), ty));
   const k = 1 - Math.exp(-4.2 * dt);
   cam.x += (tx - cam.x) * k; cam.y += (ty - cam.y) * k;
   for (const c of clouds) { c.x += c.spd * dt; if (c.x > WORLD_W + 80) c.x = -80; }
+  trauma = Math.max(0, trauma - dt * 1.6);
   if (mode === "play") {
     timeLeft -= dt;
     if (timeLeft <= 0) {
@@ -256,12 +313,16 @@ function step(dt) {
     messageT -= dt; if (messageT <= 0) { message = ""; document.getElementById("toast").textContent = ""; }
     for (const it of items) {
       it.phase += dt * 3;
+      if (it.kind === "lantern" && !it.taken) {
+        it.y -= it.drift * dt;
+        if (it.y < 80) it.y = WORLD_H - 100;
+      }
       if (it.taken) {
         it.wait -= dt;
         if (it.wait <= 0) Object.assign(it, spawn(it.kind), { kind: it.kind, value: it.value, r: it.r });
         continue;
       }
-      if (Math.hypot(dragon.x - it.x, dragon.y - it.y) < 40) collect(it);
+      if (Math.hypot(dragon.x - it.x, dragon.y - it.y) < 42) collect(it);
     }
     for (const l of landmarks) {
       l.cool = Math.max(0, l.cool - dt);
@@ -279,6 +340,7 @@ function hud() {
   const s = Math.max(0, Math.ceil(timeLeft));
   document.getElementById("timer").textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
   document.getElementById("best").textContent = best;
+  document.getElementById("fuelBar").style.width = Math.round(dragon.fuel * 100) + "%";
   const chip = document.getElementById("comboChip");
   if (combo > 1) { chip.hidden = false; document.getElementById("combo").textContent = "×" + combo; }
   else chip.hidden = true;
@@ -289,14 +351,19 @@ function frame(now) {
   last = now; acc += raw;
   while (acc >= 1 / 60) { step(1 / 60); acc -= 1 / 60; }
   const vw = innerWidth, vh = innerHeight;
+  const shake = trauma * trauma;
+  ctx.save();
+  if (shake) ctx.translate((Math.random() * 2 - 1) * 10 * shake, (Math.random() * 2 - 1) * 8 * shake);
   drawSky(vw, vh);
-  ctx.save(); ctx.translate(-cam.x * 0.35, -cam.y * 0.15);
+  ctx.save(); ctx.translate(-cam.x * 0.32, -cam.y * 0.12);
   for (const c of clouds) {
     ellipse(c.x, c.y, c.s * 0.5, c.s * 0.24, "rgba(255,236,214,0.5)");
     ellipse(c.x + c.s * 0.3, c.y + 4, c.s * 0.36, c.s * 0.18, "rgba(255,236,214,0.4)");
   }
   ctx.restore();
   drawWorld(vw, vh);
+  if (mode === "play") drawMinimap(vw);
+  ctx.restore();
   hud();
   requestAnimationFrame(frame);
 }

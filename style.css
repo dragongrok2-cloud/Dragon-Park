@@ -67,6 +67,24 @@ button:not(:disabled), [role="button"]:not(:disabled) { cursor: pointer; }
   font-weight: 600;
 }
 
+.chip.fuel i {
+  display: block;
+  margin-top: 6px;
+  height: 6px;
+  width: 88px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--fg) 12%, transparent);
+  overflow: hidden;
+}
+
+.chip.fuel b {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: var(--primary);
+  border-radius: 999px;
+}
+
 .toast {
   position: absolute;
   left: 16px;
