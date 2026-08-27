@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Dragon Park</title>
-  <meta name="description" content="Садись в седло и лети по сумеречному парку — собирай звёзды, фонари и сундуки, посещай аттракционы." />
+  <meta name="description" content="Садись в седло доброго дракона: рассветный круг по парку, звёзды, фонари, жемчуг и полный круг по семи ориентирам." />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -15,18 +15,20 @@
       <div class="chip"><span>Время</span><strong id="timer">1:30</strong></div>
       <div class="chip" id="comboChip" hidden><span>Комбо</span><strong id="combo">×1</strong></div>
       <div class="chip"><span>Рекорд</span><strong id="best">0</strong></div>
+      <div class="chip"><span>Круг</span><strong id="circuit">0/7</strong></div>
       <div class="chip fuel">
         <span>Рывок</span>
         <i><b id="fuelBar"></b></i>
       </div>
+      <button type="button" class="mute" id="muteBtn" aria-label="Звук">Звук</button>
     </header>
     <p class="toast" id="toast"></p>
     <section class="panel" id="panel">
-      <p class="kicker">Сумеречный круг</p>
+      <p class="kicker">Рассветный круг</p>
       <h1>Dragon Park</h1>
-      <p class="lead">Ночь фонарей. Садись в седло доброго дракона: звёзды, сундуки, колесо, озеро и замок.</p>
+      <p class="lead">Гость в седле. Собери свет, закрой полный круг по семи ориентирам — и встреть рассвет над замком.</p>
       <button type="button" id="startBtn">В седло</button>
-      <p class="hint">WASD или стрелки · пробел — рывок · Escape — пауза</p>
+      <p class="hint">WASD или стрелки · пробел — рывок · M — звук · Escape — пауза</p>
     </section>
     <div class="touch" id="touch" hidden>
       <div class="stick" id="stick"><i id="knob"></i></div>

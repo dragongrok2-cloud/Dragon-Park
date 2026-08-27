@@ -85,6 +85,20 @@ button:not(:disabled), [role="button"]:not(:disabled) { cursor: pointer; }
   border-radius: 999px;
 }
 
+.mute {
+  pointer-events: auto;
+  margin-left: auto;
+  height: 44px;
+  min-width: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--surface) 82%, transparent);
+  color: var(--fg);
+  font-size: 13px;
+  font-weight: 600;
+}
+
 .toast {
   position: absolute;
   left: 16px;
@@ -190,4 +204,8 @@ button:not(:disabled), [role="button"]:not(:disabled) { cursor: pointer; }
 @media (min-width: 800px) {
   .touch { display: none; }
   .panel { padding: 64px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #startBtn:active { transform: none; }
 }
