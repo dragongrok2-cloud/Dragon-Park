@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Dragon Park</title>
-  <meta name="description" content="Садись в седло доброго дракона: рассветный круг по парку, звёзды, фонари, жемчуг и полный круг по семи ориентирам." />
+  <meta name="description" content="Садись в седло доброго дракона: рассветный круг, попутный ветер, колокольчики седла и полный круг по семи ориентирам." />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -26,13 +26,16 @@
     <section class="panel" id="panel">
       <p class="kicker">Рассветный круг</p>
       <h1>Dragon Park</h1>
-      <p class="lead">Гость в седле. Собери свет, закрой полный круг по семи ориентирам — и встреть рассвет над замком.</p>
+      <p class="lead">Гость в седле. Лови попутный ветер, звени колокольчиками, махни светлячкам и закрой полный круг по семи ориентирам.</p>
       <button type="button" id="startBtn">В седло</button>
-      <p class="hint">WASD или стрелки · пробел — рывок · M — звук · Escape — пауза</p>
+      <p class="hint">WASD или стрелки · пробел — рывок · E — махнуть · M — звук · Escape — пауза</p>
     </section>
     <div class="touch" id="touch" hidden>
       <div class="stick" id="stick"><i id="knob"></i></div>
-      <button type="button" class="boost" id="boostBtn">Рывок</button>
+      <div class="touch-actions">
+        <button type="button" class="wave" id="waveBtn">Мах</button>
+        <button type="button" class="boost" id="boostBtn">Рывок</button>
+      </div>
     </div>
   </main>
   <script src="script.js"></script>
