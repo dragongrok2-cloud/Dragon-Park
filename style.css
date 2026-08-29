@@ -190,15 +190,27 @@ button:not(:disabled), [role="button"]:not(:disabled) { cursor: pointer; }
   transform: translate(-50%, -50%);
 }
 
-.boost {
+.touch-actions {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+.wave, .boost {
   width: 64px;
   height: 64px;
   border-radius: 999px;
   border: 0;
-  background: var(--primary);
-  color: var(--primary-fg);
   font-size: 12px;
   font-weight: 600;
+}
+.wave {
+  background: color-mix(in oklab, var(--surface) 80%, transparent);
+  color: var(--fg);
+  border: 1px solid var(--border);
+}
+.boost {
+  background: var(--primary);
+  color: var(--primary-fg);
 }
 
 @media (min-width: 800px) {
